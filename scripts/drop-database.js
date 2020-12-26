@@ -1,3 +1,5 @@
+// to tear down the database when the tests finish
+
 const mysql = require('mysql2')
 const path = require('path')
 

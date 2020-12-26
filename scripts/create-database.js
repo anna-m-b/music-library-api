@@ -1,4 +1,5 @@
-/* eslint-disable no-console */
+// to create a new database when we start our tests
+
 const mysql = require('mysql2')
 const path = require('path')
 
@@ -19,7 +20,7 @@ const connection = mysql.createConnection({
   port: DB_PORT,
 })
 
-connection.query(`CREATE DATABASE IF NONE EXISTS ${DB_NAME}`, (err) => {
+connection.query(`CREATE DATABASE IF NOT EXISTS ${DB_NAME}`, (err) => {
   if (err) {
     console.log('Your environment variables might be wrong. Please double check .env file')
     console.log('Environment Variables are:', { DB_PASSWORD, DB_NAME, DB_USER, DB_HOST, DB_PORT })
