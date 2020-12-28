@@ -2,17 +2,27 @@ const express = require('express')
 
 const app = express()
 
-const { create, list, getArtistById, update} = require('./controllers/artists')
+const { createArtist, listArtists, getArtistById, updateArtist, deleteArtist} = require('./controllers/artists')
+const { createAlbum } = require('./controllers/albums')
 
 app.use(express.json())
 
-app.post('/artists', create)
+// ARTISTS
 
-app.get('/artists', list)
+app.post('/artists', createArtist)
+
+app.get('/artists', listArtists)
 
 app.get('/artists/:id', getArtistById)
 
-app.patch('/artists/:id', update)
+app.patch('/artists/:id', updateArtist)
+
+app.delete('/artists/:id', deleteArtist)
+
+
+// ALBUMS
+
+app.post('/artists/:artistId/albums', createAlbum)
 
 module.exports = app
 

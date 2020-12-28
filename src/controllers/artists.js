@@ -1,10 +1,10 @@
 const { Artist } = require('../models')
 
-exports.create = (req, res) => {
+exports.createArtist = (req, res) => {
    Artist.create(req.body).then(artist => res.status(201).json(artist))
 }
 
-exports.list = (req, res) => {
+exports.listArtists = (req, res) => {
    Artist.findAll().then(artists => res.status(200).json(artists))
 }
 
@@ -20,7 +20,7 @@ exports.getArtistById = (req, res) => {
    .catch(err => console.log(err))
 }
 
-exports.update = async (req, res) => {
+exports.updateArtist = async (req, res) => {
    let rowsUpdated;
    if (!req.body.name && req.body.genre) {
       rowsUpdated = await Artist.update({ genre: req.body.genre }, { 
@@ -41,5 +41,16 @@ exports.update = async (req, res) => {
          } else {
             res.status(200).json({ rowsUpdated: rowsUpdated[0] })
          }
+}
 
+exports.deleteArtist = (req, res) => {
+   Artist.destroy({ where: { id: req.params.id }})
+   .then(rowsDeleted =>{
+      if(!rowsDeleted) {
+         res.status(404).json({ error: 'Artist not found' })
+      } else {
+         res.sendStatus(204)
+      }
+   })
+   .catch(err => console.log(err))
 }

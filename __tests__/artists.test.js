@@ -24,16 +24,20 @@ describe('/artists', () => {
 
    describe('POST /artists', async () => {
       it('creates a new artist in the database', async () => {
-         const response = await request(app).post('/artists').send({
-            name: 'Tame Impala',
-            genre: 'Rock',
-         })
+         try {
+            const response = await request(app).post('/artists').send({
+               name: 'Tame Impala',
+               genre: 'Rock',
+            })
 
-         await expect(response.status).to.equal(201)
-         expect(response.body.name).to.equal('Tame Impala');
-         const insertedArtistRecords = await Artist.findByPk(response.body.id, { raw: true });
-         expect(insertedArtistRecords.name).to.equal('Tame Impala');
-         expect(insertedArtistRecords.genre).to.equal('Rock');
+            await expect(response.status).to.equal(201)
+            expect(response.body.name).to.equal('Tame Impala');
+            const insertedArtistRecords = await Artist.findByPk(response.body.id, { raw: true });
+            expect(insertedArtistRecords.name).to.equal('Tame Impala');
+            expect(insertedArtistRecords.genre).to.equal('Rock');
+         } catch(err) {
+         done(err)
+         }
       })
    })
 
@@ -48,6 +52,7 @@ describe('/artists', () => {
             artists = documents;
             done()
          })
+         
       })
 
       describe('GET /artists', () => {
@@ -129,6 +134,32 @@ describe('/artists', () => {
             request(app)
               .patch('/artists/43252')
               .send({ name: 'Doesn\'t Exist' })
+              .then((res) => {
+                expect(res.status).to.equal(404)
+                expect(res.body.error).to.equal('Artist not found')
+                done()
+              })
+              .catch(error => done(error))
+          })
+      })
+
+      describe('DELETE /artists/:artistId', () => {
+         it('deletes artist record by id', (done) => {
+            const artist = artists[0]
+            request(app)
+               .delete(`/artists/${artist.id}`)
+               .then((res) => {
+                  expect(res.status).to.equal(204)
+                  Artist.findByPk(artist.id, { raw: true }).then((updatedArtist) => {
+                     expect(updatedArtist).to.equal(null)
+                     done()
+                  })
+               })
+               .catch(error => done(error))
+         })
+         it('returns a 404 if the artist does not exist', (done) => {
+            request(app)
+              .delete('/artists/43252')
               .then((res) => {
                 expect(res.status).to.equal(404)
                 expect(res.body.error).to.equal('Artist not found')

@@ -33,7 +33,7 @@ Start the container: `$ docker container start music_library_mysql`
 
 <br />
 
-### **Create an entry in the database**
+### **Create an entry in the Artists table**
 
 Store an artist in the database by making a POST request to: http://localhost:4000/artists  
 
@@ -91,7 +91,7 @@ If the id can't be found in the database, you will receive an error message:
 }
 ```  
 
-The controller for this route uses the Sequelize method `findByPk(id)` which returns the entry that matches the given ID. 'Pk' stands for primary key. Read about it here: [Sequelize Docs](https://sequelize.org/master/manual/model-querying-finders.html)  
+The controller for this route uses the Sequelize method `findByPk(id)` which returns the entry that matches the given ID. 'Pk' stands for primary key, which is the unique identifier of a database entry. Read about `findByPk` and other 'finders' here: [Sequelize Docs](https://sequelize.org/master/manual/model-querying-finders.html)  
   
 
 ### **Update artist name or genre**
@@ -112,7 +112,7 @@ To update the genre, use the same path but send a body with info for the new gen
 ```  
 
 
-If the request is successful you will get the following response that tells you how many rows have been updated (it should be 1):  
+If the request is successful you will get  status of 200 and the following response that tells you how many rows have been updated (it should be 1):  
 ```
 {
     "rowsUpdated": 1
@@ -127,7 +127,16 @@ And if the id sent in the request doesn't match with any entries in the database
 }
 ```
 
-To fulfill these update requests, in the controller we use the Sequelize method (Model.update)[https://sequelize.org/master/manual/model-querying-basics.html#simple-update-queries]
+To fulfill these update requests, the controller calls the Sequelize method (Model.update)[https://sequelize.org/master/manual/model-querying-basics.html#simple-update-queries]
+
+
+### **Delete an artist**
+
+To delete an artist from the artists table, make a DELETE request to http://localhost:4000/artists/:id with the id of the artist to be deleted.
+
+If it is successful, you should receive a status of 204 (No Content) and the number '1' which represents the number of rows deleted. If the id doesn't match any entry in the artist table, the same error message as above will be sent in the response body, along with status code 404 (Not Found).
+
+Behind the scenes, Sequelize's (Model.destroy)[https://sequelize.org/master/class/lib/model.js~Model.html#static-method-destroy] method does the heavy lifting.
 
 ___
 
