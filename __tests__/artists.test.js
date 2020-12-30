@@ -51,8 +51,7 @@ describe('/artists', () => {
          ]).then((documents) => {
             artists = documents;
             done()
-         })
-         
+         }) 
       })
 
       describe('GET /artists', () => {

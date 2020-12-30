@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 
 const { createArtist, listArtists, getArtistById, updateArtist, deleteArtist} = require('./controllers/artists')
-const { createAlbum } = require('./controllers/albums')
+const { createAlbum, listAlbums, listAlbumsOfArtist } = require('./controllers/albums')
 
 app.use(express.json())
 
@@ -23,6 +23,10 @@ app.delete('/artists/:id', deleteArtist)
 // ALBUMS
 
 app.post('/artists/:artistId/albums', createAlbum)
+
+app.get('/albums', listAlbums)
+
+app.get('/albums/:artistId', listAlbumsOfArtist)
 
 module.exports = app
 
