@@ -57,15 +57,16 @@ describe('/albums', () => {
         {name: 'Lonerism', year: 2012}
       ]
       request(app)
+      
         .post(`/artists/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
-         
+      
           res.body.albums.forEach((resAlbum, i) => {
-            Album.findByPk(resAlbum.id, { raw: true }).then((dbAlbum) => {
-              // console.log({dbAlbum}, {resAlbum})
-              expect(dbAlbum.name).to.equal(albums[2].name)
+          Album.findByPk(resAlbum.id, { raw: true }).then((dbAlbum) => {
+          
+              expect(dbAlbum.name).to.equal('blue')
               expect(dbAlbum.year).to.equal(albums[2].year)
               expect(dbAlbum.artistId).to.equal(artist.id) 
               
@@ -128,36 +129,80 @@ describe('/albums', () => {
       describe('GET /albums', () => {
         it('returns a list of all albums', (done) => {
           request(app)
-          .get('/albums')
-          .then(res => {
-            expect(res.status).to.equal(200)
-            expect(res.body.length).to.equal(4)
-            res.body.forEach(album => {
-              const expected = albums.find(a => a.id === album.id)
-              expect(album.artistName).to.equal(expected.artistName)
-              expect(album.name).to.equal(expected.name)
-              expect(album.year).to.equal(expected.year)
-              expect(album.artistId).to.equal(expected.artistId)
+            .get('/albums')
+            .then(res => {
+              expect(res.status).to.equal(200)
+              expect(res.body.length).to.equal(4)
+              res.body.forEach(album => {
+                const expected = albums.find(a => a.id === album.id)
+                expect(album.artistName).to.equal(expected.artistName)
+                expect(album.name).to.equal(expected.name)
+                expect(album.year).to.equal(expected.year)
+                expect(album.artistId).to.equal(expected.artistId)
+              })
+              done()
             })
-            done()
-          })
-          .catch(error => done(error))
+            .catch(error => done(error))
         })
 
         it('returns the album of a given artist by id', (done) => {
           artist = artists[1]
-          console.log(albums[2])
           request(app)
-          .get(`/albums/${artist.id}`)
-          .then(res => {
-            expect(res.status).to.equal(200)
-            expect(res.body.length).to.equal(2)
-            expect(res.body[0]).to.equal(albums[2].dataValues)
-            expect(res.body[1]).to.equal(albums[3].dataValues)
-            done()
-          })
-          .catch(error => done(error))
+            .get(`/albums/artist/${artist.id}`)
+            .then(res => {
+              expect(res.status).to.equal(200)
+              res.body.forEach(resAlbum => {
+                const expected = albums.find(a => a.id === resAlbum.id)
+                expect(resAlbum.name).to.equal(expected.name)
+                expect(resAlbum.year).to.equal(expected.year)
+                expect(resAlbum.artistId).to.equal(expected.artistId)
+              })          
+              done()
+            })
+            .catch(error => done(error))
+        })
+
+        it('returns a 404 if the artist does not exist', (done) => {
+          request(app)
+            .get('/albums/artist/12345')
+            .then((res) => {
+              expect(res.status).to.equal(404)
+              expect(res.body.error).to.equal('Artist not found')
+              done()
+            })
+            .catch(error => done(error))
+        })
+      
+        it('gets album record by id', (done) => {
+          let album = albums[1]
+          request(app)
+            .get(`/albums/${album.id}`)
+            .then((res) => {
+              expect(res.status).to.equal(200)
+              expect(res.body.name).to.equal(album.name)
+              expect(res.body.year).to.equal(album.year)
+              done()
+            })
+            .catch(error => done(error))
+        })
+
+        it('returns a 404 if the album does not exist', (done) => {
+          request(app)
+            .get('/albums/12345')
+            .then((res) => {
+              expect(res.status).to.equal(404)
+              expect(res.body.error).to.equal('Album not found')
+              done()
+            })
+            .catch(error => done(error))
         })
       })
     })
 })
+
+
+
+// TO DO
+// UPDATE it updates an album name by id, it updates an album year by id
+
+// DELETE it updates an album by id

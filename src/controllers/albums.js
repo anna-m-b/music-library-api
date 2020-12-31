@@ -36,10 +36,28 @@ exports.listAlbums = (req, res) => {
 }
 
 exports.listAlbumsOfArtist = (req, res) => {
-  console.log(req.params.artistId)
   Album.findAll({where: { artistId: req.params.artistId}})
-  .then(albums => res.status(200).json(albums))
+  .then(albums => {
+    if(!albums.length) {
+      res.status(404).send({ error: 'Artist not found'})
+    } else {
+     res.status(200).json(albums)
+    }
+  })
   .catch(err => console.log(err))
 }
+
+exports.getAlbumById = (req, res) => {
+  Album.findByPk(req.params.albumId)
+   .then(album => {
+      if (album === null) {
+         res.status(404).send({ error: 'Album not found' })
+      } else {
+         res.status(200).json(album)
+      }
+   })
+   .catch(err => console.log(err))
+}
+
 
 
