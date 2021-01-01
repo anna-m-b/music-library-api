@@ -197,12 +197,79 @@ describe('/albums', () => {
             .catch(error => done(error))
         })
       })
+
+      describe('PATCH /albums/:id', () => {
+        
+        it('updates album name by id', (done) => {
+          const album = albums[0]
+           request(app)
+              .patch(`/albums/${album.id}`)
+              .send({ name: 'Lonerist' })
+              .then(res => {
+                 expect(res.status).to.equal(200)
+                 Album.findByPk(album.id, { raw: true }).then(updatedAlbum => {
+                    expect(updatedAlbum.name).to.equal('Lonerist')
+                    done()
+                 }).catch(error => done(error))
+              })
+        })
+
+        it('updates album year by id', (done) => {
+          const album = albums[0]
+          request(app)
+          .patch(`/albums/${album.id}`)
+          .send({ year: 2011 })
+          .then(res => {
+            expect(res.status).to.equal(200)
+            Album.findByPk(album.id,  { raw: true }).then(updatedAlbum => {
+              expect(updatedAlbum.year).to.equal(2011)
+              done()
+            }).catch(error => done(error))
+          })
+        })
+
+        it('returns a 404 if the album does not exist', (done) => {
+          request(app)
+            .patch('/albums/43252')
+            .send({ name: 'Doesn\'t Exist' })
+            .then((res) => {
+              expect(res.status).to.equal(404)
+              expect(res.body.error).to.equal('Album not found')
+              done()
+            })
+            .catch(error => done(error))
+        })
+      })
+    
+
+    describe('DELETE /albums/:albumId', () => {
+      it('deletes album record by id', (done) => {
+         const album = albums[0]
+         request(app)
+            .delete(`/albums/${album.id}`)
+            .then(res => {
+               expect(res.status).to.equal(204)
+               Album.findByPk(album.id, { raw: true }).then(deletedAlbum => {
+                  expect(deletedAlbum).to.equal(null)
+                  done()
+               })
+            })
+            .catch(error => done(error))
+      })
+      it('returns a 404 if the album does not exist', (done) => {
+         request(app)
+           .delete('/albums/43252')
+           .then((res) => {
+             expect(res.status).to.equal(404)
+             expect(res.body.error).to.equal('Album not found')
+             done()
+           })
+           .catch(error => done(error))
+       })
     })
+  })
 })
 
 
 
-// TO DO
-// UPDATE it updates an album name by id, it updates an album year by id
 
-// DELETE it updates an album by id

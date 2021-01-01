@@ -140,3 +140,166 @@ Behind the scenes, Sequelize's (Model.destroy)[https://sequelize.org/master/clas
 
 ___
 
+### **Create an entry in the albums table**
+
+To insert the information for an album, make a POST request to http://localhost:4000/artists/:artistId/albums with the relevant artist id.
+
+In the body send the album name and year in JSON:
+
+
+```
+{
+  "name": "Glassworks",
+  "year": "1982"
+}
+```
+
+If all is well, the response will be the newly created record's id, e.g.
+
+```
+{
+    "id": 10
+}
+```
+
+To create multiple album entries for the same artist at once, send an array in the request body:
+
+```
+{
+  "albums": [{"name":"The Epic","year":2015},{"name":"Heaven and Earth","year":2018},{"name":"The Proclamation","year":2007}]
+}
+```
+
+A successful request will receive the created entries in the response body:
+
+```
+{
+    "albums": [
+        {
+            "id": 11,
+            "artistName": "Kamasi Washington",
+            "name": "The Epic",
+            "year": 2015,
+            "updatedAt": "2021-01-01T14:26:11.568Z",
+            "createdAt": "2021-01-01T14:26:11.540Z",
+            "artistId": 9
+        },
+        {
+            "id": 13,
+            "artistName": "Kamasi Washington",
+            "name": "Heaven and Earth",
+            "year": 2018,
+            "updatedAt": "2021-01-01T14:26:11.598Z",
+            "createdAt": "2021-01-01T14:26:11.540Z",
+            "artistId": 9
+        },
+        {
+            "id": 12,
+            "artistName": "Kamasi Washington",
+            "name": "The Proclamation",
+            "year": 2007,
+            "updatedAt": "2021-01-01T14:26:11.595Z",
+            "createdAt": "2021-01-01T14:26:11.540Z",
+            "artistId": 9
+        }
+    ]
+}
+```
+
+You can see that the artist name and artist id have been generated automatically. 
+
+### Setting foreign keys in Sequelize
+
+'artistId' is the foreign key for an album entry. After creating an album entry, `setArtist(artist)` is called on it, Sequelize does its black magic and the field artistId is given the value of the passed artist's id.
+
+This requires setting up when we set up the database in index.js in the models directory. After calling our AlbumModel, we call Sequelize's belongsTo method, which sets a many-to-one relationship between Album and Artist. Many albums can belong to one and only one artist. The first argument passed in is the Artist model which establishes that every album will be associated with an artist and have that artist's id as a foreign key. The second argument defines the field name for the foreign key - 'artist' will become 'artistId' because we use 'as'. You can also do: `foreignKey: 'artistId'` or whatever you'd like to name the field. You can also leave out this parameter and Sequelize will automatically name it.
+
+```
+ Album.belongsTo(Artist, {as: 'artist'})
+```
+---
+
+If you try to create an album entry for a non-existent artist, you'll receive:
+
+```
+{
+    "error": "Artist not found"
+}
+```
+
+### **Reading from the albums table**
+To get a list of all albums make a GET request to http://localhost:4000/albums and you'll receive an array of all the album entries, e.g.:
+
+```
+[
+    {
+        "id": 1,
+        "artistName": "Tame Impala",
+        "name": "InnerSpeaker",
+        "year": 2010,
+        "createdAt": "2021-01-01T14:53:56.000Z",
+        "updatedAt": "2021-01-01T14:53:56.000Z",
+        "artistId": 10
+    },
+    {
+        "id": 2,
+        "artistName": "Philip Glass",
+        "name": "Solo Piano",
+        "year": 1989,
+        "createdAt": "2021-01-01T14:54:02.000Z",
+        "updatedAt": "2021-01-01T14:54:03.000Z",
+        "artistId": 8
+    },
+   
+    {
+        "id": 3,
+        "artistName": "Kamasi Washington",
+        "name": "The Proclamation",
+        "year": 2007,
+        "createdAt": "2021-01-01T14:54:08.000Z",
+        "updatedAt": "2021-01-01T14:54:08.000Z",
+        "artistId": 9
+    }
+]
+```
+
+To get a list of all albums by just one artist, make a GET request passing the artist id as a route parameter to http://localhost:4000/albums/artist/:artistId.
+
+To get a specific album, pass the album id as a route parameter: http://localhost:4000/albums/:albumId
+
+
+If the artist or album isn't found the usual error message will be returned.
+
+### Updating an album entry
+
+An album name or year can be changed with a PATCH request to http://localhost:4000/albums/:albumId with the relevant album id passed as a route parameter and the change sent in the body:
+```
+{
+  "name": "Changes"
+}
+```
+or:
+```
+{
+  "year": 2015
+}
+```
+If successful the response should be '1': the number of rows that have been updated.
+
+To achieve the update, in the controller, Sequelize's Model.update method is used:
+```
+Album.update({ name: req.body.name }, {
+    where: {
+      id: req.params.albumId
+    }
+  })
+```
+
+### Deleting an album entry
+
+Send a DELETE request to http://localhost:4000/albums/:albumId
+
+As with update, a successful request will receive the number of rows updated, that is, 1.
+
+In both cases, an album id without a corresponding record will receive an error message.
+

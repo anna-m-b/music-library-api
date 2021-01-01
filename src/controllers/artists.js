@@ -22,13 +22,13 @@ exports.getArtistById = (req, res) => {
 
 exports.updateArtist = async (req, res) => {
    let rowsUpdated;
-   if (!req.body.name && req.body.genre) {
+    if (req.body.genre) {
       rowsUpdated = await Artist.update({ genre: req.body.genre }, { 
          where: {
                id: req.params.id
             }
          })
-   } else if (req.body.name && !req.body.genre) {
+   } else if (req.body.name) {
       rowsUpdated = await Artist.update({ name: req.body.name }, {
          where: {
             id: req.params.id

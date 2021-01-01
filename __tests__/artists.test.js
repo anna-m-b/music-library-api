@@ -149,8 +149,8 @@ describe('/artists', () => {
                .delete(`/artists/${artist.id}`)
                .then((res) => {
                   expect(res.status).to.equal(204)
-                  Artist.findByPk(artist.id, { raw: true }).then((updatedArtist) => {
-                     expect(updatedArtist).to.equal(null)
+                  Artist.findByPk(artist.id, { raw: true }).then((deletedArtist) => {
+                     expect(deletedArtist).to.equal(null)
                      done()
                   })
                })
