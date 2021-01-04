@@ -17,6 +17,9 @@ const { createAlbum,
         deleteAlbum 
       } = require('./controllers/albums')
 
+const { createSong,
+      } = require('./controllers/songs')
+
 app.use(express.json())
 
 // ARTISTS
@@ -45,6 +48,10 @@ app.get('/albums/:albumId', getAlbumById)
 app.patch('/albums/:albumId', updateAlbum)
 
 app.delete('/albums/:albumId', deleteAlbum)
+
+// SONGS
+
+app.post('/album/:albumId/song', createSong)
 
 module.exports = app
 

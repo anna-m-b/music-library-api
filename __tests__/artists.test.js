@@ -99,8 +99,9 @@ describe('/artists', () => {
       })
 
       describe('PATCH /artists/:id', () => {
+        
          it('updates artist genre by id', (done) => {
-         const artist = artists[0]
+          const artist = artists[0]
             request(app)
                .patch(`/artists/${artist.id}`)
                .send({ genre: 'Psychedelic Rock' })
@@ -129,13 +130,28 @@ describe('/artists', () => {
                .catch(error => done(error))
          })
 
+         it('returns a 404 if the given field to update doesn\'t exist', (done) => {
+          const artist = artists[0]
+           request(app)
+            .patch(`/artists/${artist.id}`)
+            .send({ color: 'Purple'})
+            .then(res => {
+              expect(res.status).to.equal(404)
+              expect(res.body.error).to.equal('Artist or field not found')
+              expect(res.body.requestedArtist.name).to.equal(artist.name)
+              expect(res.body.requestedArtist.genre).to.equal(artist.genre)
+              done()
+            }).catch(error => done(error))
+          })
+
          it('returns a 404 if the artist does not exist', (done) => {
             request(app)
               .patch('/artists/43252')
               .send({ name: 'Doesn\'t Exist' })
               .then((res) => {
                 expect(res.status).to.equal(404)
-                expect(res.body.error).to.equal('Artist not found')
+                expect(res.body.error).to.equal('Artist or field not found')
+                expect(res.body.requestedArtist).to.be.null
                 done()
               })
               .catch(error => done(error))

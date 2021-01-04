@@ -1,4 +1,3 @@
-const { request } = require('express')
 const { Album } = require('../models')
 const { Artist } = require('../models')
 
@@ -10,10 +9,11 @@ exports.createAlbum =  (req, res) => {
       } else if (req.body.albums) {
         Promise.all(
           req.body.albums.map(album => {
-            return Album.create({ artistName: artist.name,
-            name: album.name,
-            year: album.year
-          })
+            return Album.create({ 
+                    artistName: artist.name,
+                    name: album.name,
+                    year: album.year
+                })
           .then(album => album.setArtist(artist))
           .catch(error => console.error(error))
           })
@@ -61,25 +61,12 @@ exports.getAlbumById = (req, res) => {
 }
 
 exports.updateAlbum = async (req, res) => {
-  let rowsUpdated
-  if(req.body.name){
-    rowsUpdated = await Album.update({ name: req.body.name }, {
-    where: {
-      id: req.params.albumId
-    }
-  })
-  } else if (req.body.year){
-    rowsUpdated = await Album.update({ year: req.body.year }, {
-      where: {
-        id: req.params.albumId
-      }
-    })
-  }
-
+  const rowsUpdated = await Album.update(req.body, { where: { id: req.params.albumId } })
+  const requestedAlbum = await Album.findByPk(req.params.albumId)
   if(!rowsUpdated[0]){
-    res.status(404).send({ error: 'Album not found' })
+    res.status(404).send({ error: 'Album or field not found', requestedAlbum })
   } else {
-    res.status(200).json({ rowsUpdated: rowsUpdated[0] })
+    res.status(200).json({ updatedAlbum: requestedAlbum })
   }
 }
 

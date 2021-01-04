@@ -1,7 +1,7 @@
 # Music Library API
 *A back-end bootcamp project* <br>
 
-This music library API will store information about artists, albums and songs. A CRUD REST API will be implemented to interact with a MySQL database.
+This music library API will store information about artists, albums and songs. A CRUD (Create Read Update Delete) RESTful API will be implemented to interact with a MySQL database.
  ___
 
 ## Project status
@@ -17,10 +17,14 @@ Incomplete
 - JavaScript 
 - Sequelize
 - MySQL  
+- Docker
   
 ---  
 
 ## Getting Started
+
+
+...
 
 ___
 ## Features
@@ -100,34 +104,66 @@ To update an artist name, send a PATCH request with the name in the request body
 
 ```
 {
-   "name": "New Name"
-}
-```
-
-To update the genre, use the same path but send a body with info for the new genre:  
-```
-{ 
+   "name": "New Name",
    "genre": "New Genre"
 }
-```  
 
+```
+You can update just name, just genre, or both.
 
-If the request is successful you will get  status of 200 and the following response that tells you how many rows have been updated (it should be 1):  
+If the request is successful you will get  status of 200 and the entry that has been updated:
 ```
 {
-    "rowsUpdated": 1
+    "updatedArtist": {
+        "id": 9,
+        "name": "New name",
+        "genre": "new genre",
+        "createdAt": "2020-12-28T12:03:17.000Z",
+        "updatedAt": "2021-01-02T20:16:09.000Z"
+    }
 }
 ```  
 
-And if the id sent in the request doesn't match with any entries in the database the response should be:  
+And if the id sent in the request doesn't match with any entries in the database the response should be a 404 and in the response body:  
 
 ```
 {
-    "error": "Artist not found"
+    "error": "Artist or field not found",
+    "requestedArtist": null
 }
 ```
+
+If the id is correct, but the field sent is not, the response will include the requested artist, in this way you know that it's the field that was incorrect:
+
+```
+{
+    "error": "Artist or field not found",
+    "requestedArtist": {
+        "id": 9,
+        "name": "New name",
+        "genre": "new genre",
+        "createdAt": "2020-12-28T12:03:17.000Z",
+        "updatedAt": "2021-01-02T20:16:09.000Z"
+    }
+}
+```
+
 
 To fulfill these update requests, the controller calls the Sequelize method (Model.update)[https://sequelize.org/master/manual/model-querying-basics.html#simple-update-queries]
+Model.update returns the number of rows that have been updated. But as we are always only updating one record in this request, in the controller we grab the newly updated record and send that back in the response instead (lines 3, 5 and 7):  
+
+```
+exports.updateArtist = async (req, res) => {
+  const rowsUpdated = await Artist.update(req.body, { where: { id: req.params.id } }) 
+  const requestedArtist = await Artist.findByPk(req.params.id)
+  if (!rowsUpdated[0]) {
+    res.status(404).json({ error: 'Artist or field not found', requestedArtist })
+  } else {
+    res.status(200).json({ updatedArtist: requestedArtist })
+  }
+}
+```  
+
 
 
 ### **Delete an artist**
@@ -270,36 +306,21 @@ To get a specific album, pass the album id as a route parameter: http://localhos
 
 If the artist or album isn't found the usual error message will be returned.
 
-### Updating an album entry
+### **Updating an album entry**
 
-An album name or year can be changed with a PATCH request to http://localhost:4000/albums/:albumId with the relevant album id passed as a route parameter and the change sent in the body:
+An album name or year can be changed with a PATCH request to http://localhost:4000/albums/:albumId with the relevant album id passed as a route parameter and the changes sent in the body (both or just one field will work)
 ```
 {
-  "name": "Changes"
-}
-```
-or:
-```
-{
+  "name": "New name",
   "year": 2015
 }
 ```
-If successful the response should be '1': the number of rows that have been updated.
 
-To achieve the update, in the controller, Sequelize's Model.update method is used:
-```
-Album.update({ name: req.body.name }, {
-    where: {
-      id: req.params.albumId
-    }
-  })
-```
+This works the same as updating an artist entry. The response will have the updated record, or an error message and the requested record (which will be `null` if the record doesn't exist)
 
-### Deleting an album entry
+### **Deleting an album entry**
 
-Send a DELETE request to http://localhost:4000/albums/:albumId
-
-As with update, a successful request will receive the number of rows updated, that is, 1.
-
-In both cases, an album id without a corresponding record will receive an error message.
+Send a DELETE request to http://localhost:4000/albums/:albumId  
+A successful request will receive the number of rows updated, that is, 1.  
+An album id without a corresponding record will receive an error message.
 

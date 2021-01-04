@@ -49,7 +49,6 @@ describe('/albums', () => {
          }).catch(error => done(error))  
      })
 
-     //this test gives false positives
      it('creates multiple albums for a given artist', (done) => {
       const albums = [
         {name: 'InnerSpeaker', year: 2010},
@@ -57,23 +56,15 @@ describe('/albums', () => {
         {name: 'Lonerism', year: 2012}
       ]
       request(app)
-      
         .post(`/artists/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
-      
           res.body.albums.forEach((resAlbum, i) => {
-          Album.findByPk(resAlbum.id, { raw: true }).then((dbAlbum) => {
-          
-              expect(dbAlbum.name).to.equal('blue')
-              expect(dbAlbum.year).to.equal(albums[2].year)
-              expect(dbAlbum.artistId).to.equal(artist.id) 
-              
-            })
+            expect(resAlbum.name).to.equal(albums[i].name)
+            expect(resAlbum.year).to.equal(albums[i].year)
           })
           done()
-         
         })
         .catch(error => done(error))
      })
@@ -100,8 +91,7 @@ describe('/albums', () => {
 
    describe('with albums in the database', () => {
      let albums, artists;
-
-      beforeEach((done) => {
+     beforeEach((done) => {
          Promise.all([
             Artist.create({ name: 'Tame Impala', genre: 'Rock' }),
             Artist.create({ name: 'Kylie Minogue', genre: 'Pop' }),
@@ -228,13 +218,28 @@ describe('/albums', () => {
           })
         })
 
+        it('returns a 404 if the given field doesn\'t exist', () => {
+          const album = albums[0]
+          request(app)
+            .patch(`/albums/${album.id}`)
+            .send({ price: 15 })
+            .then(res => {
+              expect(res.status).to.equal(404)
+              expect(res.body.error).to.equal('Album or field not found')
+              expect(res.body.requestedAlbum.name).to.equal(album.name)
+              expect(res.body.requestedAlbum.year).to.equal(album.year)
+              done()
+            }).catch(error => done(error))
+        })
+
         it('returns a 404 if the album does not exist', (done) => {
           request(app)
             .patch('/albums/43252')
             .send({ name: 'Doesn\'t Exist' })
             .then((res) => {
               expect(res.status).to.equal(404)
-              expect(res.body.error).to.equal('Album not found')
+              expect(res.body.error).to.equal('Album or field not found')
+              expect(res.body.requestedAlbum).to.be.null
               done()
             })
             .catch(error => done(error))
@@ -256,6 +261,7 @@ describe('/albums', () => {
             })
             .catch(error => done(error))
       })
+      
       it('returns a 404 if the album does not exist', (done) => {
          request(app)
            .delete('/albums/43252')
