@@ -93,31 +93,28 @@ describe('/albums', () => {
         .catch(error => done(error))
      })
      
-     it('creates multiple albums for a given artist', () => {
+     // this works - not using a forEach loop
+    it('creates multiple albums for a given artist', (done) => {
       const albums = [
         {name: 'InnerSpeaker', year: 2010},
         {name: 'Currents', year: 2015},
         {name: 'Lonerism', year: 2012}
       ]
-       request(app)
+      request(app)
         .post(`/artists/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
           const album = res.body.albums[1]
-          console.log('albums', res.body.albums)
-            Album.findByPk(album.id, { raw: true }).then((album) => {
-              console.log({album})
-              expect(album.name).to.equal('Wrong')
-              expect(album.year).to.equal(2015)
-              expect(album.artistId).to.equal(artist.id)
-            })
-          }).catch(error => done(error))
+            Album.findByPk(album.id, { raw: true }).then((DBalbum) => {
+              expect(DBalbum.name).to.equal('Currents')
+              expect(DBalbum.year).to.equal(2015)
+              expect(DBalbum.artistId).to.equal(artist.id)
+              done()
+            }).catch(error => done(error))
+          })
+    })
         
-        })
-        
-     
- 
      it('returns a 404 and does not create an album if the artist does not exist', (done) => {
        request(app)
          .post('/artists/1234/albums')
@@ -238,7 +235,6 @@ describe('/albums', () => {
       })
 
       describe('PATCH /albums/:id', () => {
-        
         it('updates album name by id', (done) => {
           const album = albums[0]
            request(app)
