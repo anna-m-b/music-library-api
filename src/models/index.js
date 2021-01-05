@@ -19,7 +19,8 @@ const setUpDatabase = () => {
    
    Album.belongsTo(Artist, {as: 'artist'})
    Song.belongsTo(Artist, {as: 'artist' })
-   Song.belongsTo(Album, { as: 'album'})
+   Song.belongsTo(Album, {as: 'album'})
+  //  Artist.hasMany(Album, {as: 'album'})
 
    connection.sync({ alter: true })
    return {

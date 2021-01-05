@@ -68,6 +68,55 @@ describe('/albums', () => {
         })
         .catch(error => done(error))
      })
+
+     // test that doesn't work for the above but comparing what's in the db with the albums delcared here 
+     xit('creates multiple albums for a given artist', () => {
+      const albums = [
+        {name: 'InnerSpeaker', year: 2010},
+        {name: 'Currents', year: 2015},
+        {name: 'Lonerism', year: 2012}
+      ]
+       return request(app)
+        .post(`/artists/${artist.id}/albums`)
+        .send({ albums })
+        .then((res) => {
+          expect(res.status).to.equal(201)
+          res.body.albums.forEach((album, i) => {
+            Album.findByPk(album.id, { raw: true }).then((album) => {
+              expect(album.name).to.equal('wrong')
+              expect(album.year).to.equal(54354524)
+              expect(album.artistId).to.equal(artist.id)
+            })
+          })
+        
+        })
+        .catch(error => done(error))
+     })
+     
+     it('creates multiple albums for a given artist', () => {
+      const albums = [
+        {name: 'InnerSpeaker', year: 2010},
+        {name: 'Currents', year: 2015},
+        {name: 'Lonerism', year: 2012}
+      ]
+       request(app)
+        .post(`/artists/${artist.id}/albums`)
+        .send({ albums })
+        .then((res) => {
+          expect(res.status).to.equal(201)
+          const album = res.body.albums[1]
+          console.log('albums', res.body.albums)
+            Album.findByPk(album.id, { raw: true }).then((album) => {
+              console.log({album})
+              expect(album.name).to.equal('Wrong')
+              expect(album.year).to.equal(2015)
+              expect(album.artistId).to.equal(artist.id)
+            })
+          }).catch(error => done(error))
+        
+        })
+        
+     
  
      it('returns a 404 and does not create an album if the artist does not exist', (done) => {
        request(app)
