@@ -72,7 +72,7 @@ describe('/artists', () => {
          })
       })
 
-      describe('GET /artists/:id', () => {
+      describe('GET /artists/:artistId', () => {
          it('gets artist record by id', (done) => {
             const artist = artists[0]
             request(app)
@@ -98,7 +98,7 @@ describe('/artists', () => {
           })
       })
 
-      describe('PATCH /artists/:id', () => {
+      describe('PATCH /artists/:artistId', () => {
         
          it('updates artist genre by id', (done) => {
           const artist = artists[0]
@@ -168,7 +168,7 @@ describe('/artists', () => {
                   Artist.findByPk(artist.id, { raw: true }).then((deletedArtist) => {
                      expect(deletedArtist).to.equal(null)
                      done()
-                  })
+                  }).catch(error => done(error))
                })
                .catch(error => done(error))
          })

@@ -20,7 +20,12 @@ const { createAlbum,
 const { createSong,
       } = require('./controllers/songs')
 
+const { checkParamsArtistId } = require('./middleware/validation')
+const { logging } = require('./middleware/logging')
+
 app.use(express.json())
+// app.use(logging)
+
 
 // ARTISTS
 
@@ -28,20 +33,19 @@ app.post('/artists', createArtist)
 
 app.get('/artists', listArtists)
 
-app.get('/artists/:id', getArtistById)
+app.get('/artists/:artistId', checkParamsArtistId, getArtistById)
 
-app.patch('/artists/:id', updateArtist)
+app.patch('/artists/:artistId', updateArtist)
 
-app.delete('/artists/:id', deleteArtist)
-
+app.delete('/artists/:artistId', checkParamsArtistId, deleteArtist)
 
 // ALBUMS
 
-app.post('/artists/:artistId/albums', createAlbum)
+app.post('/artist/:artistId/albums', checkParamsArtistId, createAlbum)
 
 app.get('/albums', listAlbums)
 
-app.get('/albums/artist/:artistId', listAlbumsOfArtist)
+app.get('/albums/artist/:artistId', checkParamsArtistId, listAlbumsOfArtist)
 
 app.get('/albums/:albumId', getAlbumById)
 

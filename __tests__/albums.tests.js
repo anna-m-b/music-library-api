@@ -32,7 +32,7 @@ describe('/albums', () => {
    describe('POST /artists/:artistId/albums', () => {
      it('creates a new album for a given artist', (done) => {
        request(app)
-         .post(`/artists/${artist.id}/albums`)
+         .post(`/artist/${artist.id}/albums`)
          .send({
            name: 'InnerSpeaker',
            year: 2010,
@@ -56,7 +56,7 @@ describe('/albums', () => {
         {name: 'Lonerism', year: 2012}
       ]
       request(app)
-        .post(`/artists/${artist.id}/albums`)
+        .post(`/artist/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
@@ -70,14 +70,14 @@ describe('/albums', () => {
      })
 
      // test that doesn't work for the above but comparing what's in the db with the albums delcared here 
-     xit('creates multiple albums for a given artist', () => {
+     xit('creates multiple albums for a given artist', (done) => {
       const albums = [
         {name: 'InnerSpeaker', year: 2010},
         {name: 'Currents', year: 2015},
         {name: 'Lonerism', year: 2012}
       ]
-       return request(app)
-        .post(`/artists/${artist.id}/albums`)
+      request(app)
+        .post(`/artist/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
@@ -87,6 +87,7 @@ describe('/albums', () => {
               expect(album.year).to.equal(54354524)
               expect(album.artistId).to.equal(artist.id)
             })
+            done()
           })
         
         })
@@ -101,7 +102,7 @@ describe('/albums', () => {
         {name: 'Lonerism', year: 2012}
       ]
       request(app)
-        .post(`/artists/${artist.id}/albums`)
+        .post(`/artist/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
@@ -117,7 +118,7 @@ describe('/albums', () => {
         
      it('returns a 404 and does not create an album if the artist does not exist', (done) => {
        request(app)
-         .post('/artists/1234/albums')
+         .post('/artist/1234/albums')
          .send({
            name: 'InnerSpeaker',
            year: 2010,
