@@ -22,7 +22,8 @@ exports.createAlbum =  (req, res) => {
                       year: req.body.year
       })
       .then(album => album.setArtist(artist))
-      .then(album => res.status(201).json({ id: album.id }))      
+      .then(album => res.status(201).json({ id: album.id }))
+      .catch(error => console.error(error))     
     }
 }
 

@@ -6,24 +6,32 @@ const SongModel = require('./song')
 const { DB_NAME, DB_PASSWORD, DB_USER, DB_HOST, DB_PORT } = process.env
 
 const setUpDatabase = () => {
-   const connection =  new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+  const connection =  new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
       host: DB_HOST,
       port: DB_PORT,
       dialect: 'mysql',
       logging: false,
-   })
+  })
 
-   const Artist = ArtistModel(connection, Sequelize)
-   const Album = AlbumModel(connection, Sequelize)
-   const Song = SongModel(connection, Sequelize)
+  const Artist = ArtistModel(connection, Sequelize)
+  const Album = AlbumModel(connection, Sequelize)
+  const Song = SongModel(connection, Sequelize)
    
-   Album.belongsTo(Artist, {as: 'artist'})
-   Song.belongsTo(Artist, {as: 'artist' })
-   Song.belongsTo(Album, {as: 'album'})
- 
+  Album.belongsTo(Artist, {
+    onDelete: 'cascade' 
+  })
 
-   connection.sync({ alter: true })
-   return {
+  Song.belongsTo(Artist, {
+    onDelete: 'cascade' 
+  })
+
+  Song.belongsTo(Album, {
+    onDelete: 'cascade'
+  })
+ 
+  connection.sync({ alter: true })
+ 
+  return {
       Artist,
       Album,
       Song

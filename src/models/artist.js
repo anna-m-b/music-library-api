@@ -4,6 +4,6 @@ module.exports = (connection, DataTypes) => {
       genre: DataTypes.STRING,
    }
 
-   const ArtistModel = connection.define('Artist', schema)
+   const ArtistModel = connection.define('artist', schema)
    return ArtistModel
 }

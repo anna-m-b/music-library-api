@@ -1,7 +1,7 @@
 const  { Song } = require('../models')
 const  { Artist } = require('../models')
 const  { Album } = require('../models')
-const album = require('../models/album')
+
 
 exports.createSong = (req, res) => {
   const { album, artist } = res.locals
@@ -33,4 +33,22 @@ exports.listSongsOfArtist = (req, res) => {
   const { artist } = res.locals
   Song.findAll({ where: { artistId: artist.id }})
     .then(songs => res.status(200).json({ artist: artist.name, songs: songs}))
+}
+
+exports.updateSong = (req, res) => {
+  const { songId } = req.params
+  Song.update(req.body, { where: { id: songId } })
+  .then(() => {
+    Song.findByPk(songId, {include: [{ model: Artist, as: 'artist'}, {model: Album, as: 'album'}]})
+    .then(song => {
+      res.status(200).json(song)
+    })
+  }).catch(error => console.log(error))
+}
+
+exports.deleteSong = (req, res) => {
+  Song.destroy({ where: { id: req.params.songId } })
+  .then((rowsDeleted) => {
+    res.status(204).json({ rowsDeleted })
+  }).catch(error => console.log(error))
 }

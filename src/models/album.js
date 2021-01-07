@@ -5,6 +5,6 @@ module.exports = (connection, DataTypes) => {
       year: DataTypes.INTEGER(4),
    }
 
-   const AlbumModel = connection.define('Album', schema)
+   const AlbumModel = connection.define('album', schema)
    return AlbumModel
 }
