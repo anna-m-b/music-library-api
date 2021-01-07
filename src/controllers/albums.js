@@ -40,15 +40,8 @@ exports.listAlbumsOfArtist = (req, res) => {
 }
 
 exports.getAlbumById = (req, res) => {
-  Album.findByPk(req.params.albumId)
-   .then(album => {
-      if (album === null) {
-         res.status(404).send({ error: 'Album not found' })
-      } else {
-         res.status(200).json(album)
-      }
-   })
-   .catch(err => console.log(err))
+  const { album } = res.locals
+  res.status(200).json(album)
 }
 
 exports.updateAlbum = async (req, res) => {
@@ -63,15 +56,11 @@ exports.updateAlbum = async (req, res) => {
 
 exports.deleteAlbum = (req, res) => {
   Album.destroy({ where: { id: req.params.albumId } })
-  .then(rowsDeleted => {
-  
-    if (!rowsDeleted) {
-     res.status(404).send({ error: 'Album not found' })
-    } else {
-     res.status(204).json({ rowsDeleted: rowsDeleted })
-    }
-  }).catch(error => console.log(error))
+  .then((rowsDeleted) => res.status(204).json({ rowsDeleted }))
+  .catch(err => console.error(err))
 }
  
 
 
+
+// updateAlbum

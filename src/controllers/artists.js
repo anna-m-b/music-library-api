@@ -24,6 +24,6 @@ exports.updateArtist = async (req, res) => {
 
 exports.deleteArtist = (req, res) => {
    Artist.destroy({ where: { id: req.params.artistId }})
-   .then(() => res.sendStatus(204))
+   .then((rowsDeleted) => res.status(204).json({ rowsDeleted }))
    .catch(err => console.log(err))
 }
