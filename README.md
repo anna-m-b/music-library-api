@@ -34,7 +34,7 @@ Complete
 &nbsp;  - [CRUD albums](#albums)  
 &nbsp; &nbsp; &nbsp; &nbsp; - [Setting foreign keys in Sequelize](#setting-foreign-keys-in-sequelize)  
 &nbsp;  - [CRUD songs](#songs)  
-&nbsp; &nbsp; &nbsp; &nbsp; - [Using Sequelize - includes](#sequelize-includes)
+&nbsp; &nbsp; &nbsp; &nbsp; - [Using Sequelize - includes](#sequelize---includes)
 
 
 ---  
