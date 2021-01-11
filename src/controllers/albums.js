@@ -2,34 +2,34 @@ const { Album } = require('../models')
 
 exports.createAlbum =  (req, res) => {
   const { artist } = res.locals
-    if (req.body.albums) {
-      Promise.all(
-        req.body.albums.map(album => {
-          return Album.create({ 
-                  artistName: artist.name,
-                  name: album.name,
-                  year: album.year
-              })
-        .then(album => album.setArtist(artist))
-        .catch(error => console.error(error))
-        })
-      ) 
-      .then(albums => res.status(201).json({albums}))
-      .catch(error => console.error(error))
-    } else {
-      Album.create({ artistName: artist.name,
-                      name: req.body.name,
-                      year: req.body.year
-      })
+  if (req.body.albums) {
+    Promise.all(
+      req.body.albums.map(album => {
+        return Album.create({ 
+                artistName: artist.name,
+                name: album.name,
+                year: album.year
+            })
       .then(album => album.setArtist(artist))
-      .then(album => res.status(201).json({ id: album.id }))
-      .catch(error => console.error(error))     
-    }
+      })
+    ) 
+    .then(albums => res.status(201).json({ albums }))
+    .catch(error => console.error('error in createAlbum(mulitple)', error))
+  } else {
+    Album.create({ 
+      artistName: artist.name,
+      name: req.body.name,
+      year: req.body.year
+    })
+    .then(album => album.setArtist(artist))
+    .then(album => res.status(201).json({ id: album.id }))
+    .catch(error => console.error('error in createAlbum(single)', error))   
+  }
 }
 
 exports.listAlbums = (req, res) => {
     Album.findAll().then(albums => res.status(200).json(albums))
-    .catch(err => console.log(err))  
+    .catch(error => console.error('error in listAlbums', error)) 
 }
 
 exports.listAlbumsOfArtist = (req, res) => {
@@ -37,7 +37,7 @@ exports.listAlbumsOfArtist = (req, res) => {
   .then(albums => {
     res.status(200).json(albums)
   })
-  .catch(err => console.log(err))
+  .catch(error => console.error('error in listAlbumsOfArtist', error)) 
 }
 
 exports.getAlbumById = (req, res) => {
@@ -45,23 +45,21 @@ exports.getAlbumById = (req, res) => {
   res.status(200).json(album)
 }
 
-exports.updateAlbum = async (req, res) => {
-  const rowsUpdated = await Album.update(req.body, { where: { id: req.params.albumId } })
-  const requestedAlbum = await Album.findByPk(req.params.albumId)
-  if(!rowsUpdated[0]){
-    res.status(404).send({ error: 'Album or field not found', requestedAlbum })
+exports.updateAlbum = (req, res) => {
+  const requestedAlbum = res.locals.album
+  Album.update(req.body, { where: { id: req.params.albumId } })
+  .then(rowsUpdated => {
+    if(!rowsUpdated[0]){
+    res.status(404).send({ error: 'Field(s) not found', requestedAlbum })
   } else {
     res.status(200).json({ updatedAlbum: requestedAlbum })
   }
+  })
+  .catch(error => console.error('error in updateAlbum', error)) 
 }
 
 exports.deleteAlbum = (req, res) => {
   Album.destroy({ where: { id: req.params.albumId } })
   .then((rowsDeleted) => res.status(204).json({ rowsDeleted }))
-  .catch(err => console.error(err))
+  .catch(error => console.error('error in deleteAlbum', error)) 
 }
- 
-
-
-
-// updateAlbum

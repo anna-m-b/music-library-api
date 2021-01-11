@@ -38,7 +38,7 @@ describe('/songs', () => {
   describe('POST /songs', () => {
     it('creates a new song under an album and returns records in place of foreign keys ', (done) => {
       request(app)
-        .post(`/albums/${album.id}/songs`)
+        .post(`/songs/albums/${album.id}`)
         .send({
           artistId: artist.id,
           name: 'Solitude Is Bliss',
@@ -56,7 +56,7 @@ describe('/songs', () => {
 
     it('returns a 404 if album does not exist', (done) => {
       request(app)
-        .post('/albums/32423/songs')
+        .post('/songs/albums/32423')
         .send({
           artistId: artist.id,
           name: 'Solitude Is Bliss',
@@ -70,7 +70,7 @@ describe('/songs', () => {
 
     it('returns a 404 if artist does not exist', (done) => {
       request(app)
-        .post(`/albums/${album.id}/songs`)
+        .post(`/songs/albums/${album.id}`)
         .send({
           artistId: 4343,
           name: 'Solitude Is Bliss'

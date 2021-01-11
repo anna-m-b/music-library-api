@@ -19,36 +19,37 @@ exports.createSong = (req, res) => {
 
 exports.listSongs = (req, res) => {
   Song.findAll().then(songs => res.status(200).json({ songs }))
-    .catch(err => console.err(err))
+    .catch(error => console.error('error in listSongs', error))
 }
 
 exports.listSongsOfAlbum = (req, res) => {
   const { album } = res.locals
   Song.findAll({ where: { albumId: album.id}})
-    .then(songs => res.status(200).json({ album: album.name, songs: songs }))
-    .catch(err => console.error(err))
+    .then(songs => res.status(200).json({ album: album.name, songs }))
+    .catch(error => console.error('error in listSongsOfAlbum', error))
 }
 
 exports.listSongsOfArtist = (req, res) => {
   const { artist } = res.locals
   Song.findAll({ where: { artistId: artist.id }})
-    .then(songs => res.status(200).json({ artist: artist.name, songs: songs}))
+    .then(songs => res.status(200).json({ artist: artist.name, songs }))
+    .catch(error => console.error('error in listSongsOfArtist', error))
 }
 
 exports.updateSong = (req, res) => {
   const { songId } = req.params
   Song.update(req.body, { where: { id: songId } })
   .then(() => {
-    Song.findByPk(songId, {include: [{ model: Artist, as: 'artist'}, {model: Album, as: 'album'}]})
+    Song.findByPk(songId, { include: [{ model: Artist, as: 'artist' }, { model: Album, as: 'album' }] })
     .then(song => {
       res.status(200).json(song)
     })
-  }).catch(error => console.log(error))
+  }).catch(error => console.error('error in updateSong', error))
 }
 
 exports.deleteSong = (req, res) => {
   Song.destroy({ where: { id: req.params.songId } })
   .then((rowsDeleted) => {
     res.status(204).json({ rowsDeleted })
-  }).catch(error => console.log(error))
+  }).catch(error => console.error('error in deleteSong', error))
 }

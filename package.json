@@ -8,7 +8,7 @@
     "test": "mocha __tests__/**/*.js --exit --recursive --timeout 30000 --file ./__tests__/test-setup.js",
     "posttest": "node scripts/drop-database.js",
     "prestart": "node scripts/create-database.js",
-    "start": "nodemon -r dotenv/config index.js"
+    "start": "nodemon --trace-warnings -r dotenv/config index.js"
   },
   "repository": {
     "type": "git",

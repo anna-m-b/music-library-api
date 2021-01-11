@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const Sequelize = require('sequelize')
 const ArtistModel = require('./artist')
 const AlbumModel = require('./album')
@@ -37,7 +38,5 @@ const setUpDatabase = () => {
       Song
    }
 }
-
-
 
 module.exports = setUpDatabase() 

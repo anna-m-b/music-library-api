@@ -14,7 +14,7 @@ describe('/artists', () => {
       } 
    })
 
-   beforeEach(async () => { // clean up the table before each test to prevent old data messing with our tests
+   beforeEach(async () => { 
       try {
          await Artist.destroy({ where: {} })
       } catch (err) {
@@ -36,13 +36,13 @@ describe('/artists', () => {
             expect(insertedArtistRecords.name).to.equal('Tame Impala');
             expect(insertedArtistRecords.genre).to.equal('Rock');
          } catch(err) {
-         done(err)
+         console.log(err)
          }
       })
    })
 
    describe('with artists in the database', () => {
-      let artists;
+      let artists
       beforeEach((done) => {
          Promise.all([
             Artist.create({ name: 'Tame Impala', genre: 'Rock' }),
@@ -137,7 +137,7 @@ describe('/artists', () => {
             .send({ color: 'Purple'})
             .then(res => {
               expect(res.status).to.equal(404)
-              expect(res.body.error).to.equal('Artist or field not found')
+              expect(res.body.error).to.equal('Field(s) given not found')
               expect(res.body.requestedArtist.name).to.equal(artist.name)
               expect(res.body.requestedArtist.genre).to.equal(artist.genre)
               done()
@@ -150,8 +150,7 @@ describe('/artists', () => {
               .send({ name: 'Doesn\'t Exist' })
               .then((res) => {
                 expect(res.status).to.equal(404)
-                expect(res.body.error).to.equal('Artist or field not found')
-                expect(res.body.requestedArtist).to.be.null
+                expect(res.body.error).to.equal('Artist not found')
                 done()
               })
               .catch(error => done(error))

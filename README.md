@@ -1,12 +1,14 @@
 # Music Library API
 *A back-end bootcamp project* <br>
 
-This music library API will store information about artists, albums and songs. A CRUD (Create Read Update Delete) RESTful API will be implemented to interact with a MySQL database.
+The music library SQL database stores information about artists, albums and songs. A CRUD (Create Read Update Delete) RESTful API is implemented to interact with the music library.
  ___
+## Contents
+[Getting Started](#Getting_Started)
 
 ## Project status
 
-Incomplete
+Complete
 
 ---  
 
@@ -23,17 +25,184 @@ Incomplete
 
 ## Getting Started
 
+You will need a local installation of mysql for this project. We've achieved this using Docker. To do the same for Windows or Mac, [download Docker Desktop](https://docs.docker.com/get-docker/). Once that has installed, make sure it is running, open up your terminal and pull and run a MySQL image with:
 
-...
+```
+docker run -d -p 3307:3306 --name music_library_mysql -e MYSQL_ROOT_PASSWORD=<PASSWORD> mysql
+```
+Replace `<PASSWORD>` with a password of your choice.
+
+It's useful to have MySQL workbench to connect directly to our database. Download it [here](https://dev.mysql.com/downloads/workbench/) or on Linux run `$ sudo apt install mysql-workbench`.
+
+Open MySQL workbench and connect to the MySQL container music_library_mysql with parameters:  
+
+  host: 127.0.0.1  
+  port: 3307    
+  password: whatever you set it to when you ran the container  
+
+Next, fork this repo then clone your forked copy on to your machine. Run `$ npm install` to grab the project dependencies. 
+
+You'll need to create a `.env` file to store environmental variables for the database:
+
+```
+DB_PASSWORD=<your chosen password>
+DB_NAME=<your chosen name>
+DB_USER=root
+DB_HOST=localhost
+DB_PORT=3307
+``` 
+
+And a `.env.test` file for the test database (the same except for the DB_NAME):
+```
+DB_PASSWORD=<your chosen password>
+DB_NAME=<your chosen name>_test
+DB_USER=root
+DB_HOST=localhost
+DB_PORT=3307
+```
+Add both these env files to `.gitignore`.
+
+The app is set to run on port 4000. If you'd like to change this, do so in `index.js` by changing the value of `APP_PORT` on line 3.  
 
 ___
-## Features
+
+## Overview  
+
+### Music Library Database 
+
+The database consists of 3 tables: artists, albums and songs.
+
+Here is an ERD (Entity Relationship Diagram) of the Music Library Database:  
+
+<img alt="Diagram showing the database table entities and their relationships"
+     src="./images/ERD-music-library.png"
+     width="500"
+/>
+  
+As you can see, there are 3 entities, each representing the type of entries that can be made into each table. In the left-hand column of each you can see the fields and in the right-hand column the corresponding datatypes. In this database we only have 2 different datatypes: medium integers (int) and strings (varchar(255)). 255 is the maximum length of the string. 
+
+Each entity has a **primary key**, noted in the diagrams as (PK). Primary keys are a unique identifying property, and in this database the ids of each entry function as the primary key. FK stands for **foreign key** and creates associations between tables. Every album has an artist, and the primary key of its corresponding artist is set as the album's foreign key, stored under the column **artistId**. This links the tables.
+
+Songs have 2 foreign keys, artist and album, which again will be the primary keys of each. Setting these associations mean we can, for example, pull up the connceted artist and album records when we retrieve a song.
+
+The final thing to note in the diagram are the connecting lines representing the relationships between the entities. An artist can have 0 or many albums, so the end of the line connecting to Album has a circle representing zero, and 3 lines representing many. The same for the end of the connecting line reaching Song. A song or an album, however, in this database for simplicity's sake, have one and only one artist. They cannot be created without being associated with an artist. A song also has one and only one album. This relationship is represented by the single line crossing the line's end connecting Artist to Album, Song to Artist and Song to Album.
+  
+***
+
+### The App
+
+App directory structure (minus tests)
+
+```
+music-library-api/  
+  |-- index.js  
+  |__src/  
+      |-- controllers/  
+      |-- middleware/  
+      |-- models/  
+      |-- routes/  
+      |-- app.js  
+```
+
+`index.js` is the entry point. Here we import our app, set the port and tell it to listen to that port. All the fun stuff happens in `src`.
+
+In `app.js` we delcare our app object using `express()`, import our routes and set them up on the app with `app.use()`.
+
+<br /> 
+
+**Routes**
+
+```
+routes/  
+  |--albums.js  
+  |--artists.js  
+  |--songs.js  
+```
+In each file you'll find the routes for the 3 possible paths of /artists, /albums and /songs. Middleware and controller functions are passed to each call on the router. For example:  
+
+```
+albumsRouter.post('/artists/:artistId', checkArtistId, createAlbum)
+```  
+Here we are handling the path `'/albums/artists/:artistId'` (the first portion '/albums' is set when we call `app.use` in `app.js`). When a request comes into this route, the id passed in the route parameter artistId will be checked by middleware function `checkArtistId`. Then, if this doesn't generate a '404 Not Found' response, the final middleware, the controller createAlbum, will be called and send a response back to the client.
+
+`checkArtistId` and other custom middleware serving to validate requests can be found in `middleware/validation/index.js`.  
+
+<br /> 
+
+**Controllers**  
+  
+```
+controllers/  
+  |--albums.js  
+  |--artists.js  
+  |--songs.js  
+```
+The controllers make use of Sequelize methods to interact with the database, CRUD-ing (Creating, Reading, Updating and Deleting) records. For example:
+
+```
+// controllers/songs.js  
+
+exports.listSongs = (req, res) => {
+  Song.findAll().then(songs => res.status(200).json({ songs }))
+}
+```
+
+Here we call a Sequelize method findAll on our Song model (more on that shortly). Because we have passed no parameters to findAll, it will retrieve all the records in the `songs` table and return them in an array. We take this response and send it back to the client along with an a-ok status code of 200. 
+
+<br />
+  
+
+**Models**
+
+```
+models/
+  |--album.js
+  |--artist.js
+  |--index.js
+  |--song.js
+```
+
+Sequelize is an ORM - an Object Relational Mapper. It allows us to create and manipulate a SQL database using JavaScript by converting, or mapping, the database into programmatic objects. Then we can write JavaScript code that tells Sequelize what SQL queries to implement and we never have to write an SQL query again. We do however have to learn the Sequelize library.
+
+We set up our database in `models/index.js` with a big spoonful of Sequelize magic. Here we require Sequelize and our models, connect to our database, instantiate the models and set up relationships between them, and importantly, return our models. 
+  
+So what are models?  
+
+Sequelize Models correpsond to tables. For each table, we have a model. So we have 3 tables - albums, artists and songs - and we have 3 model files: album, artist and song. In each file we have a function bound to module.exports. The model will take 2 arguments: `connection` (declared in `models/index.js`) and Sequelize itself, here named DataTypes, as that is what we will use it for. In this function we set the column names and their datatypes, in the object `schema`. Then we declare the Album model on our database, passing in 2 arguments - the first will be used to name our table (it will be converted to plural) and the second is the `schema` object that defines the columns and data types.  
+
+
+```
+// models/album.js  
+
+module.exports = (connection, DataTypes) => {
+   const schema = {
+      artistName: DataTypes.STRING,
+      name: DataTypes.STRING,
+      year: DataTypes.INTEGER,
+   }
+
+   const AlbumModel = connection.define('album', schema)
+   return AlbumModel
+}
+```  
+<br/>
+
+Here's a diagram I made to help me understand how the express app, Sequelize, the database and docker fit together. 
+
+<img alt="A diagram showing Sequelize, pictured inside the app, talking to the database that's inside a docker container" 
+    src="./images/diagram.png"
+    width="500"
+/>
+
+
+## CRUDding the database
 
 Before trying to update the database make sure both your app and mysql container are running by enetering the following commands into your terminal:
 
-Start your app: `$ npm start`
-
-Start the container: `$ docker container start music_library_mysql`  
+Start the container: `$ docker container start music_library_mysql`     
+Start your app: `$ npm start`  
+  
+You can also run the tests: `$ npm t`
 
 <br />
 
