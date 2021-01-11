@@ -2,11 +2,9 @@
 *A back-end bootcamp project* <br>
 
 The music library SQL database stores information about artists, albums and songs. A CRUD (Create Read Update Delete) RESTful API is implemented to interact with the music library.
- ___
-## Contents
-[Getting Started](#Getting_Started)
+ ___  
 
-## Project status
+ ### Project status
 
 Complete
 
@@ -20,7 +18,25 @@ Complete
 - Sequelize
 - MySQL  
 - Docker
-  
+
+
+---
+
+## Contents
+- [Getting Started](#getting-started)  
+
+- [Overview](#overview)  
+&nbsp; - [Database overview](#music-library-database)  
+&nbsp; - [Express App overview](#the-app)    
+
+- [Sending requests](#sending-requests)  
+&nbsp;  - [CRUD artists](#artists)   
+&nbsp;  - [CRUD albums](#albums)  
+&nbsp; &nbsp; &nbsp; &nbsp; - [Setting foreign keys in Sequelize](#setting-foreign-keys-in-sequelize)  
+&nbsp;  - [CRUD songs](#songs)  
+&nbsp; &nbsp; &nbsp; &nbsp; - [Using Sequelize - includes](#sequelize-includes)
+
+
 ---  
 
 ## Getting Started
@@ -195,7 +211,7 @@ Here's a diagram I made to help me understand how the express app, Sequelize, th
 />
 
 
-## CRUDding the database
+## Sending Requests
 
 Before trying to update the database make sure both your app and mysql container are running by enetering the following commands into your terminal:
 
@@ -205,6 +221,8 @@ Start your app: `$ npm start`
 You can also run the tests: `$ npm t`
 
 <br />
+
+## Artists
 
 ### **Create an entry in the Artists table**
 
@@ -293,20 +311,20 @@ If the request is successful you will get  status of 200 and the entry that has 
 }
 ```  
 
-And if the id sent in the request doesn't match with any entries in the database the response should be a 404 and in the response body:  
+And if the artist id sent in the request doesn't match with any entries in the database the response should be a 404 and in the response body:  
 
 ```
 {
-    "error": "Artist or field not found",
-    "requestedArtist": null
+    "error": "Artist not found",
+  
 }
 ```
 
-If the id is correct, but the field sent is not, the response will include the requested artist, in this way you know that it's the field that was incorrect:
+If the id is correct, but the field sent is not, the response will include the requested artist, in this way the available fields can be checked.
 
 ```
 {
-    "error": "Artist or field not found",
+    "error": "Field(s) given not found",
     "requestedArtist": {
         "id": 9,
         "name": "New name",
@@ -345,25 +363,34 @@ Behind the scenes, Sequelize's (Model.destroy)[https://sequelize.org/master/clas
 
 ___
 
+## Albums
+
 ### **Create an entry in the albums table**
 
-To insert the information for an album, make a POST request to http://localhost:4000/artists/:artistId/albums with the relevant artist id.
+To insert the information for an album, make a POST request to http://localhost:4000/albums/artists/:artistId with the relevant artist id.
 
 In the body send the album name and year in JSON:
 
 
 ```
 {
-  "name": "Glassworks",
-  "year": "1982"
+  "name": "Disco",
+  "year": "2000"
 }
 ```
 
-If all is well, the response will be the newly created record's id, e.g.
+If all is well, the response will be the newly created record e.g.
 
 ```
-{
-    "id": 10
+{ 
+    "album": {
+        "id": 7,
+        "artistName": "Kylie",
+        "name": "Disco",
+        "year": 2000,
+        "updatedAt": "2021-01-11T17:22:37.622Z",
+        "createdAt": "2021-01-11T17:22:37.596Z",
+        "artistId": 1
 }
 ```
 
@@ -431,6 +458,8 @@ If you try to create an album entry for a non-existent artist, you'll receive:
     "error": "Artist not found"
 }
 ```
+ 
+
 
 ### **Reading from the albums table**
 To get a list of all albums make a GET request to http://localhost:4000/albums and you'll receive an array of all the album entries, e.g.:
@@ -485,7 +514,8 @@ An album name or year can be changed with a PATCH request to http://localhost:40
 }
 ```
 
-This works the same as updating an artist entry. The response will have the updated record, or an error message and the requested record (which will be `null` if the record doesn't exist)
+This works the same as updating an artist entry. The response will have the updated record, or an error message.  
+   
 
 ### **Deleting an album entry**
 
@@ -493,3 +523,153 @@ Send a DELETE request to http://localhost:4000/albums/:albumId
 A successful request will receive the number of rows updated, that is, 1.  
 An album id without a corresponding record will receive an error message.
 
+***
+
+## Songs
+<br />  
+
+### **Create a song entry in the songs table**
+
+To create a song entry, make a POST request to http://localhost:4000/songs/albums/:albumId and in the request body send the song name and the id of the artist, e.g:
+
+```
+{ 
+  "name": "a song",
+  "artistId": 1 
+}
+```
+The album id (sent in route params) and the artist id (sent in the request body) are needed because songs are assoiciated with both these tables and have 2 foreign keys - the artist and album ids.
+
+A successful response will show the newly created song record and the associated artist and album records:
+
+```
+{
+    "id": 1,
+    "name": "a song",
+    "createdAt": "2021-01-11T17:31:04.000Z",
+    "updatedAt": "2021-01-11T17:31:04.000Z",
+    "artistId": 1,
+    "albumId": 3,
+    "artist": {
+        "id": 1,
+        "name": "Kylie",
+        "genre": "pop",
+        "createdAt": "2021-01-07T21:00:35.000Z",
+        "updatedAt": "2021-01-11T17:07:35.000Z"
+    },
+    "album": {
+        "id": 3,
+        "artistName": "Kylie",
+        "name": "Disco",
+        "year": 2000,
+        "createdAt": "2021-01-07T21:06:04.000Z",
+        "updatedAt": "2021-01-07T21:06:04.000Z",
+        "artistId": 1
+    }
+}
+```
+### Sequelize - includes
+
+The reason we get all this data back is found in these lines of code in `controllers/songs.js`:
+
+```
+  Song.findByPk(song.id, { 
+            include: [
+              { model: Artist }, 
+              { model: Album }
+            ] 
+          })
+          .then((songData) => res.status(201).json(songData))
+``` 
+
+We pass `findByPk` the option `include` with an array of objects defining the models we want to include. 
+
+
+### **Reading from the songs table**
+To get a list of all songs make a GET request to http://localhost:4000/songs and you'll receive an array of all the song entries, e.g.:
+
+```
+{
+    "songs": [
+        {
+            "id": 1,
+            "name": "a song",
+            "createdAt": "2021-01-11T17:31:04.000Z",
+            "updatedAt": "2021-01-11T17:31:04.000Z",
+            "artistId": 1,
+            "albumId": 3
+        },
+        {
+            "id": 2,
+            "name": "anther song",
+            "createdAt": "2021-01-11T17:38:25.000Z",
+            "updatedAt": "2021-01-11T17:38:25.000Z",
+            "artistId": 1,
+            "albumId": 3
+        },
+        ...
+    ]
+}
+```
+
+To get a list of all songs by one artist, make a GET request passing the artist id as a route parameter to http://localhost:4000/songs/artist/:artistId.
+
+To get all the songs of one album, pass the album id as a route parameter: http://localhost:4000/songs/albums/:albumId
+
+
+If the artist or album isn't found the usual error message will be returned.
+
+### **Updating a song entry**
+
+A song name can be changed with a PATCH request to http://localhost:4000/songs/:songId with the relevant song id passed as a route parameter and the new name sent in the body.
+```
+{
+  "name": "New name",
+  
+}
+```
+
+A successful response looks like:
+
+```
+{
+    "id": 1,
+    "name": "New song name",
+    "createdAt": "2021-01-11T17:31:04.000Z",
+    "updatedAt": "2021-01-11T17:51:43.000Z",
+    "artistId": 1,
+    "albumId": 3,
+    "artist": {
+        "id": 1,
+        "name": "Kylie",
+        "genre": "pop",
+        "createdAt": "2021-01-07T21:00:35.000Z",
+        "updatedAt": "2021-01-11T17:51:08.000Z"
+    },
+    "album": {
+        "id": 3,
+        "artistName": "Kylie",
+        "name": "Disco",
+        "year": 2000,
+        "createdAt": "2021-01-07T21:06:04.000Z",
+        "updatedAt": "2021-01-07T21:06:04.000Z",
+        "artistId": 1
+    }
+}
+```
+
+If the passed song id doesn't match any resource in the songs table, an error message will be returned:
+
+```
+{
+    "error": "Song not found"
+}
+```
+
+### **Deleting a song**
+
+Send a DELETE request to http://localhost:4000/songs/:albumId  
+A successful request will receive the number of rows updated, that is, 1.  
+An song id without a corresponding record will receive an error message.
+
+***

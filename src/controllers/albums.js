@@ -22,7 +22,7 @@ exports.createAlbum =  (req, res) => {
       year: req.body.year
     })
     .then(album => album.setArtist(artist))
-    .then(album => res.status(201).json({ id: album.id }))
+    .then(album => res.status(201).json({ album }))
     .catch(error => console.error('error in createAlbum(single)', error))   
   }
 }
@@ -46,14 +46,16 @@ exports.getAlbumById = (req, res) => {
 }
 
 exports.updateAlbum = (req, res) => {
-  const requestedAlbum = res.locals.album
   Album.update(req.body, { where: { id: req.params.albumId } })
   .then(rowsUpdated => {
-    if(!rowsUpdated[0]){
-    res.status(404).send({ error: 'Field(s) not found', requestedAlbum })
-  } else {
-    res.status(200).json({ updatedAlbum: requestedAlbum })
-  }
+    Album.findByPk(req.params.albumId)
+    .then(requestedAlbum => {
+      if(!rowsUpdated[0]){
+        res.status(404).send({ error: 'Field(s) not found', requestedAlbum })
+      } else {
+        res.status(200).json({ updatedAlbum: requestedAlbum })
+      }
+    })
   })
   .catch(error => console.error('error in updateAlbum', error)) 
 }

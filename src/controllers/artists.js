@@ -15,14 +15,16 @@ exports.getArtistById = (req, res) => {
 }
 
 exports.updateArtist = (req, res) => {
-  const requestedArtist = res.locals.artist
   Artist.update(req.body, { where: { id: req.params.artistId } })
   .then(rowsUpdated => {
-    if (!rowsUpdated[0]) {
+    Artist.findByPk(req.params.artistId)
+    .then(requestedArtist => {
+      if (!rowsUpdated[0]) {
         res.status(404).json({ error: 'Field(s) given not found', requestedArtist })
       } else {
         res.status(200).json({ updatedArtist: requestedArtist })
       }
+    })
   })
   .catch(error => console.error('error in updateAritst', error))
 }

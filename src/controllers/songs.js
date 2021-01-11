@@ -10,8 +10,13 @@ exports.createSong = (req, res) => {
     song.setAlbum(album)
       .then(() => song.setArtist(artist))
         .then(() => {
-          Song.findByPk(song.id, {include: [{ model: Artist, as: 'artist'}, {model: Album, as: 'album'}]})
-            .then((songData) => res.status(201).json(songData))
+          Song.findByPk(song.id, { 
+            include: [
+              { model: Artist }, 
+              { model: Album }
+            ] 
+          })
+          .then((songData) => res.status(201).json(songData))
         })
   })
     .catch(error => console.error('error in createSong', error))   

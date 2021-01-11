@@ -107,6 +107,7 @@ describe('/artists', () => {
                .send({ genre: 'Psychedelic Rock' })
                .then(( res => {
                   expect(res.status).to.equal(200)
+                  expect(res.body.updatedArtist.genre).to.equal('Psychedelic Rock')
                   Artist.findByPk(artist.id, { raw: true }).then((updatedArtist) => {
                      expect(updatedArtist.genre).to.equal('Psychedelic Rock')
                      done()
@@ -122,6 +123,7 @@ describe('/artists', () => {
                .send({ name: 'Tame Impaler' })
                .then(( res => {
                   expect(res.status).to.equal(200)
+                  expect(res.body.updatedArtist.name).to.equal('Tame Impaler')
                   Artist.findByPk(artist.id, { raw: true }).then((updatedArtist) => {
                      expect(updatedArtist.name).to.equal('Tame Impaler')
                      done()
