@@ -261,7 +261,7 @@ The controller for this route uses the Sequelize method `findAll()` with no argu
   
 ### **Get one artist by ID**
 
-Make a GET request to: http://localhost:4000/artists/:id but replace `:id` with the ID of the artist you want. 
+Make a GET request to: http://localhost:4000/artists/:artistId but replace `:artistId` with the ID of the artist you want. 
 
 For example, `http://localhost:4000/artists/1` returns  
 
@@ -287,7 +287,7 @@ The controller for this route uses the Sequelize method `findByPk(id)` which ret
 
 ### **Update artist name or genre**
 
-To update an artist name, send a PATCH request with the name in the request body to http://localhost:4000/artists/:id
+To update an artist name, send a PATCH request with the name in the request body to http://localhost:4000/artists/:artistId
 
 ```
 {
@@ -355,7 +355,7 @@ exports.updateArtist = async (req, res) => {
 
 ### **Delete an artist**
 
-To delete an artist from the artists table, make a DELETE request to http://localhost:4000/artists/:id with the id of the artist to be deleted.
+To delete an artist from the artists table, make a DELETE request to http://localhost:4000/artists/:artistId with the id of the artist to be deleted.
 
 If it is successful, you should receive a status of 204 (No Content) and the number '1' which represents the number of rows deleted. If the id doesn't match any entry in the artist table, the same error message as above will be sent in the response body, along with status code 404 (Not Found).
 
