@@ -668,7 +668,7 @@ If the passed song id doesn't match any resource in the songs table, an error me
 
 ### **Deleting a song**
 
-Send a DELETE request to http://localhost:4000/songs/:albumId  
+Send a DELETE request to http://localhost:4000/songs/:songId  
 A successful request will receive the number of rows updated, that is, 1.  
 An song id without a corresponding record will receive an error message.
 
