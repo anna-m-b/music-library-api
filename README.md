@@ -123,7 +123,7 @@ music-library-api/
 
 `index.js` is the entry point. Here we import our app, set the port and tell it to listen to that port. All the fun stuff happens in `src`.
 
-In `app.js` we delcare our app object using `express()`, import our routes and set them up on the app with `app.use()`.
+In `app.js` we declare our app object using `express()`, import our routes and set them up on the app with `app.use()`.
 
 <br /> 
 
