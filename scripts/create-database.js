@@ -7,6 +7,7 @@ const args = process.argv.slice(2)[0]
 
 const envFile = args === 'test' ? '../.env.test' : '../.env'
 
+console.log('creating db',  {args})
 require('dotenv').config({
   path: path.join(__dirname, envFile),
 })

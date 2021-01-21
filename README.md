@@ -27,7 +27,8 @@ Complete
 
 - [Overview](#overview)  
 &nbsp; - [Database overview](#music-library-database)  
-&nbsp; - [Express App overview](#the-app)    
+&nbsp; - [Express App overview](#the-app)   
+&nbsp; &nbsp; &nbsp; &nbsp; - [Sequelize Models](#models)
 
 - [Sending requests](#sending-requests)  
 &nbsp;  - [CRUD artists](#artists)   
@@ -99,7 +100,7 @@ As you can see, there are 3 entities, each representing the type of entries that
 
 Each entity has a **primary key**, noted in the diagrams as (PK). Primary keys are a unique identifying property, and in this database the ids of each entry function as the primary key. FK stands for **foreign key** and creates associations between tables. Every album has an artist, and the primary key of its corresponding artist is set as the album's foreign key, stored under the column **artistId**. This links the tables.
 
-Songs have 2 foreign keys, artist and album, which again will be the primary keys of each. Setting these associations mean we can, for example, pull up the connceted artist and album records when we retrieve a song.
+Songs have 2 foreign keys, artist and album, which again will be the primary keys of each. Setting these associations mean we can, for example, pull up the connected artist and album records when we retrieve a song.
 
 The final thing to note in the diagram are the connecting lines representing the relationships between the entities. An artist can have 0 or many albums, so the end of the line connecting to Album has a circle representing zero, and 3 lines representing many. The same for the end of the connecting line reaching Song. A song or an album, however, in this database for simplicity's sake, have one and only one artist. They cannot be created without being associated with an artist. A song also has one and only one album. This relationship is represented by the single line crossing the line's end connecting Artist to Album, Song to Artist and Song to Album.
   
@@ -168,7 +169,7 @@ Here we call a Sequelize method findAll on our Song model (more on that shortly)
 <br />
   
 
-**Models**
+### **Models**
 
 ```
 models/
@@ -184,7 +185,7 @@ We set up our database in `models/index.js` with a big spoonful of Sequelize mag
   
 So what are models?  
 
-Sequelize Models correpsond to tables. For each table, we have a model. So we have 3 tables - albums, artists and songs - and we have 3 model files: album, artist and song. In each file we have a function bound to module.exports. The model will take 2 arguments: `connection` (declared in `models/index.js`) and Sequelize itself, here named DataTypes, as that is what we will use it for. In this function we set the column names and their datatypes, in the object `schema`. Then we declare the Album model on our database, passing in 2 arguments - the first will be used to name our table (it will be converted to plural) and the second is the `schema` object that defines the columns and data types.  
+Sequelize Models correspond to tables. For each table, we have a model. So we have 3 tables - albums, artists and songs - and we have 3 model files: album, artist and song. In each file we have a function bound to module.exports. The model will take 2 arguments: `connection` (declared in `models/index.js`) and Sequelize itself, here named DataTypes, as that is what we will use it for. In this function we set the column names and their datatypes, in the object `schema`. Then we declare the Album model on our database, passing in 2 arguments - the first will be used to name our table (it will be converted to plural) and the second is the `schema` object that defines the columns and data types.  
 
 
 ```
@@ -213,7 +214,7 @@ Here's a diagram I made to help me understand how the express app, Sequelize, th
 
 ## Sending Requests
 
-Before trying to update the database make sure both your app and mysql container are running by enetering the following commands into your terminal:
+Before trying to update the database make sure both your app and mysql container are running by entering the following commands into your terminal:
 
 Start the container: `$ docker container start music_library_mysql`     
 Start your app: `$ npm start`  
@@ -261,7 +262,7 @@ The controller for this route uses the Sequelize method `findAll()` with no argu
   
 ### **Get one artist by ID**
 
-Make a GET request to: http://localhost:4000/artists/:id but replace `:id` with the ID of the artist you want. 
+Make a GET request to: http://localhost:4000/artists/:artistId but replace `:artistId` with the ID of the artist you want. 
 
 For example, `http://localhost:4000/artists/1` returns  
 
@@ -287,7 +288,7 @@ The controller for this route uses the Sequelize method `findByPk(id)` which ret
 
 ### **Update artist name or genre**
 
-To update an artist name, send a PATCH request with the name in the request body to http://localhost:4000/artists/:id
+To update an artist name, send a PATCH request with the name in the request body to http://localhost:4000/artists/:artistId
 
 ```
 {
@@ -336,7 +337,7 @@ If the id is correct, but the field sent is not, the response will include the r
 ```
 
 
-To fulfill these update requests, the controller calls the Sequelize method (Model.update)[https://sequelize.org/master/manual/model-querying-basics.html#simple-update-queries]
+To fulfill these update requests, the controller calls the Sequelize method [Model.update](https://sequelize.org/master/manual/model-querying-basics.html#simple-update-queries)
 Model.update returns the number of rows that have been updated. But as we are always only updating one record in this request, in the controller we grab the newly updated record and send that back in the response instead (lines 3, 5 and 7):  
 
 ```
@@ -355,11 +356,11 @@ exports.updateArtist = async (req, res) => {
 
 ### **Delete an artist**
 
-To delete an artist from the artists table, make a DELETE request to http://localhost:4000/artists/:id with the id of the artist to be deleted.
+To delete an artist from the artists table, make a DELETE request to http://localhost:4000/artists/:artistId with the id of the artist to be deleted.
 
 If it is successful, you should receive a status of 204 (No Content) and the number '1' which represents the number of rows deleted. If the id doesn't match any entry in the artist table, the same error message as above will be sent in the response body, along with status code 404 (Not Found).
 
-Behind the scenes, Sequelize's (Model.destroy)[https://sequelize.org/master/class/lib/model.js~Model.html#static-method-destroy] method does the heavy lifting.
+Behind the scenes, Sequelize's [Model.destroy](https://sequelize.org/master/class/lib/model.js~Model.html#static-method-destroy) method does the heavy lifting.
 
 ___
 
@@ -538,7 +539,7 @@ To create a song entry, make a POST request to http://localhost:4000/songs/album
   "artistId": 1 
 }
 ```
-The album id (sent in route params) and the artist id (sent in the request body) are needed because songs are assoiciated with both these tables and have 2 foreign keys - the artist and album ids.
+The album id (sent in route params) and the artist id (sent in the request body) are needed because songs are associated with both these tables and have 2 foreign keys - the artist and album ids.
 
 A successful response will show the newly created song record and the associated artist and album records:
 
@@ -669,7 +670,10 @@ If the passed song id doesn't match any resource in the songs table, an error me
 ### **Deleting a song**
 
 Send a DELETE request to http://localhost:4000/songs/:albumId  
-A successful request will receive the number of rows updated, that is, 1.  
-An song id without a corresponding record will receive an error message.
+  
+A successful request will receive the number of rows updated, that is, 1.    
+  
+  
+A song id without a corresponding record will receive an error message.
 
 ***
