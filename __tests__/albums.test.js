@@ -29,10 +29,10 @@ describe('/albums', () => {
      }
    })
  
-   describe('POST /albums/artists/:artistId', () => {
+   describe('POST /artists/:artistId/albums', () => {
      it('creates a new album for a given artist', (done) => {
        request(app)
-         .post(`/albums/artists/${artist.id}`)
+         .post(`/artists/${artist.id}/albums`)
          .send({
            name: 'InnerSpeaker',
            year: 2010,
@@ -56,7 +56,7 @@ describe('/albums', () => {
         {name: 'Lonerism', year: 2012}
       ]
       request(app)
-        .post(`/albums/artists/${artist.id}`)
+        .post(`/artists/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
@@ -76,7 +76,7 @@ describe('/albums', () => {
         {name: 'Lonerism', year: 2012}
       ]
       request(app)
-        .post(`/albums/artists/${artist.id}`)
+        .post(`/artists/${artist.id}/albums`)
         .send({ albums })
         .then((res) => {
           expect(res.status).to.equal(201)
@@ -92,7 +92,7 @@ describe('/albums', () => {
         
      it('returns a 404 and does not create an album if the artist does not exist', (done) => {
        request(app)
-         .post('/albums/artists/1234')
+         .post('/artists/1234/albums')
          .send({
            name: 'InnerSpeaker',
            year: 2010,
@@ -159,7 +159,7 @@ describe('/albums', () => {
         it('returns the album of a given artist by id', (done) => {
           artist = artists[1]
           request(app)
-            .get(`/albums/artists/${artist.id}`)
+            .get(`/artists/${artist.id}/albums`)
             .then(res => {
               expect(res.status).to.equal(200)
               res.body.forEach(resAlbum => {
@@ -175,7 +175,7 @@ describe('/albums', () => {
 
         it('returns a 404 if the artist does not exist', (done) => {
           request(app)
-            .get('/albums/artists/12345')
+            .get('/artists/12345/albums')
             .then((res) => {
               expect(res.status).to.equal(404)
               expect(res.body.error).to.equal('Artist not found')

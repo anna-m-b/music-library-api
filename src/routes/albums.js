@@ -1,27 +1,30 @@
 const albumsRouter = require('express').Router()
 
 const { 
-  createAlbum, 
   listAlbums, 
-  listAlbumsOfArtist, 
   getAlbumById, 
   updateAlbum, 
   deleteAlbum 
 } = require('../controllers/albums')
 
-const { checkArtistId, checkAlbumId } = require('../middleware/validation')
+const {
+  listSongsOfAlbum,
+  createSong
+} = require('../controllers/songs')
 
-albumsRouter.post('/artists/:artistId', checkArtistId, createAlbum)
+const { checkAlbumId, checkArtistId } = require('../middleware/validation')
 
 albumsRouter.get('/', listAlbums)
-
-albumsRouter.get('/artists/:artistId', checkArtistId, listAlbumsOfArtist)
 
 albumsRouter.get('/:albumId', checkAlbumId, getAlbumById)
 
 albumsRouter.patch('/:albumId', checkAlbumId, updateAlbum)
 
 albumsRouter.delete('/:albumId', checkAlbumId, deleteAlbum)
+
+albumsRouter.get('/:albumId/songs', checkAlbumId, listSongsOfAlbum)
+
+albumsRouter.post('/:albumId/songs', checkAlbumId, checkArtistId, createSong)
 
 module.exports = albumsRouter
 

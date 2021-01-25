@@ -23,7 +23,8 @@ exports.createSong = (req, res) => {
 }
 
 exports.listSongs = (req, res) => {
-  Song.findAll().then(songs => res.status(200).json({ songs }))
+  Song.findAll({ includes: [{ model: Artist }, { model: Album }]})
+    .then(songs => res.status(200).json({ songs }))
     .catch(error => console.error('error in listSongs', error))
 }
 

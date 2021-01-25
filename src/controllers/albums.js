@@ -1,4 +1,4 @@
-const { Album } = require('../models')
+const { Album, Artist } = require('../models')
 
 exports.createAlbum =  (req, res) => {
   const { artist } = res.locals
@@ -28,7 +28,7 @@ exports.createAlbum =  (req, res) => {
 }
 
 exports.listAlbums = (req, res) => {
-    Album.findAll().then(albums => res.status(200).json(albums))
+    Album.findAll({include: [{model: Artist}]}).then(albums => res.status(200).json(albums))
     .catch(error => console.error('error in listAlbums', error)) 
 }
 

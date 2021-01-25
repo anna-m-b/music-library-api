@@ -38,7 +38,7 @@ describe('/songs', () => {
   describe('POST /songs', () => {
     it('creates a new song under an album and returns records in place of foreign keys ', (done) => {
       request(app)
-        .post(`/songs/albums/${album.id}`)
+        .post(`/albums/${album.id}/songs`)
         .send({
           artistId: artist.id,
           name: 'Solitude Is Bliss',
@@ -56,7 +56,7 @@ describe('/songs', () => {
 
     it('returns a 404 if album does not exist', (done) => {
       request(app)
-        .post('/songs/albums/32423')
+        .post('/albums/32423/songs')
         .send({
           artistId: artist.id,
           name: 'Solitude Is Bliss',
@@ -70,7 +70,7 @@ describe('/songs', () => {
 
     it('returns a 404 if artist does not exist', (done) => {
       request(app)
-        .post(`/songs/albums/${album.id}`)
+        .post(`/albums/${album.id}/songs`)
         .send({
           artistId: 4343,
           name: 'Solitude Is Bliss'
@@ -113,7 +113,7 @@ describe('/songs', () => {
 
       it('lists all songs on a given album', (done) => {
         request(app)
-        .get(`/songs/albums/${album.id}`)
+        .get(`/albums/${album.id}/songs`)
         .then(res => {
           expect(res.status).to.equal(200)
           expect(res.body.album).to.equal(album.name)
@@ -127,7 +127,7 @@ describe('/songs', () => {
 
       it('returns a 404 if album does not exist', (done) => {
         request(app)
-        .get('/songs/albums/32342')
+        .get('/albums/32342/songs')
         .then(res => {
           expect(res.status).to.equal(404)
           expect(res.body.error).to.equal('Album not found')
@@ -137,7 +137,7 @@ describe('/songs', () => {
 
       it('lists all songs of a given artist', (done) => {
         request(app)
-        .get(`/songs/artists/${artist.id}`)
+        .get(`/artists/${artist.id}/songs`)
         .then(res => {
           expect(res.status).to.equal(200)
           expect(res.body.artist).to.equal(artist.name)
@@ -151,7 +151,7 @@ describe('/songs', () => {
 
       it('returns a 404 if artist does not exist', (done) => {
         request(app)
-        .get('/songs/artists/32342')
+        .get('/artists/32342/songs')
         .then(res => {
           expect(res.status).to.equal(404)
           expect(res.body.error).to.equal('Artist not found')
