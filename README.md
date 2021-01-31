@@ -193,7 +193,6 @@ Sequelize Models correspond to tables. For each table, we have a model. So we ha
 
 module.exports = (connection, DataTypes) => {
    const schema = {
-      artistName: DataTypes.STRING,
       name: DataTypes.STRING,
       year: DataTypes.INTEGER,
    }

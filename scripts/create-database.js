@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 // to create a new database when we start our tests
 
 const mysql = require('mysql2')
@@ -7,7 +8,6 @@ const args = process.argv.slice(2)[0]
 
 const envFile = args === 'test' ? '../.env.test' : '../.env'
 
-console.log('creating db',  {args})
 require('dotenv').config({
   path: path.join(__dirname, envFile),
 })

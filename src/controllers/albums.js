@@ -5,8 +5,7 @@ exports.createAlbum =  (req, res) => {
   if (req.body.albums) {
     Promise.all(
       req.body.albums.map(album => {
-        return Album.create({ 
-                artistName: artist.name,
+        return Album.create({                 
                 name: album.name,
                 year: album.year
             })
@@ -17,7 +16,6 @@ exports.createAlbum =  (req, res) => {
     .catch(error => console.error('error in createAlbum(mulitple)', error))
   } else {
     Album.create({ 
-      artistName: artist.name,
       name: req.body.name,
       year: req.body.year
     })
